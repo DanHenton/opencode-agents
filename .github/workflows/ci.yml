@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+
+      - name: Verify dependencies
+        run: go mod verify
+
+      - name: Lint (go vet)
+        run: go vet ./...
+
+      - name: Format Check
+        run: if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then echo "Code is not formatted. Run 'go fmt ./...'"; exit 1; fi
+
+      - name: Test
+        run: go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+
+      - name: Build
+        run: go build -v -o bin/opencode-agents ./cmd/opencode-agents
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: opencode-agents-linux-amd64
+          path: bin/opencode-agents
