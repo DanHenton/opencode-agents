@@ -72,6 +72,7 @@ Use the interactive checklist to pick which agents you want active. This updates
 
 Agents are defined in simple Markdown files. You can organize them however you like:
 
+
 ```text
 ~/.config/opencode-agents/
 ├── AGENTS.md           # Shared context & documentation
@@ -79,6 +80,19 @@ Agents are defined in simple Markdown files. You can organize them however you l
     ├── architect.md    # A "Reasoning" model for design
     ├── plan.md         # A read-only planning partner
     └── fix.md          # A "Speed" model for quick edits
+```
+
+
+```sh
+
+cd ~/.config/opencode-agents/ && opencode .
+
+```
+
+Build a new agent persona, then import the agent into the target opencode.json file via:
+
+```
+opencode-agents
 ```
 
 ### Configuration Format
