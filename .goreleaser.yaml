@@ -22,13 +22,13 @@ builds:
     goarch:
       - amd64
       - arm64
-      - 386
+      - "386"
       - arm
     goarm:
       - "7"
     ignore:
       - goos: darwin
-        goarch: 386
+        goarch: "386"
       - goos: darwin
         goarch: arm
       - goos: windows
@@ -37,7 +37,12 @@ builds:
     binary: opencode-agents
 
 archives:
-  - format: tar.gz
+  - formats:
+      - tar.gz
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
     # this name template makes the OS and Arch compatible with the results of `uname`.
     name_template: >-
       {{ .ProjectName }}_
@@ -46,10 +51,6 @@ archives:
       {{- else if eq .Arch "386" }}i386
       {{- else }}{{ .Arch }}{{ end }}
       {{- if .Arm }}v{{ .Arm }}{{ end }}
-    # use zip for windows archives
-    format_overrides:
-      - goos: windows
-        format: zip
 
 changelog:
   sort: asc
