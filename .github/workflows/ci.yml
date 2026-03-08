@@ -21,6 +21,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Go
         uses: actions/setup-go@v5
@@ -39,14 +41,18 @@ jobs:
       - name: Test
         run: go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
 
-      - name: Build
-        run: go build -v -o bin/opencode-agents ./cmd/opencode-agents
+      - name: Run GoReleaser (Snapshot)
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: "~> v2"
+          args: build --snapshot --clean
 
-      - name: Upload Build Artifact
+      - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: opencode-agents-linux-amd64
-          path: bin/opencode-agents
+          name: opencode-agents-binaries
+          path: dist/
 
   release:
     name: Release
@@ -68,7 +74,7 @@ jobs:
         uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
-          version: latest
+          version: "~> v2"
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
