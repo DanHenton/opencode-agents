@@ -43,6 +43,11 @@ func NewCLI(global, local, syncAll bool, dir string) *CLI {
 }
 
 func (c *CLI) Run() error {
+	// Ensure configuration exists before proceeding
+	if err := c.EnsureConfig(); err != nil {
+		return err
+	}
+
 	var targetPath string
 	home, err := os.UserHomeDir()
 	globalPath := ""
