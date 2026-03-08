@@ -25,9 +25,36 @@ Take the output, save it to your `agents/` directory, and you now have a repeata
 ## ⚡️ Quick Start
 
 ### 1. Install
-Download the latest binary for your platform from our **[Release Page](https://github.com/opencode/opencode-agents/releases)**.
 
-*Building from source?*
+**Option A: Pre-compiled Binaries (Recommended)**
+
+1. Download the latest release for your operating system and architecture from the **[Releases Page](https://github.com/opencode/opencode-agents/releases)**.
+2. Extract the archive and place the `opencode-agents` binary into a directory that is included in your system's `PATH`.
+
+> 💡 **What is the system PATH?**
+> The `PATH` is an environment variable containing a list of directories that your operating system checks for executable files. Placing the binary in one of these directories (like `/usr/local/bin` on Linux/macOS) allows you to run the `opencode-agents` command from any folder in your terminal.
+
+**Linux / macOS:**
+```bash
+# Extract the downloaded archive (replace filename with your specific version)
+tar -xzf opencode-agents_Linux_x86_64.tar.gz
+
+# Move the binary to a directory in your PATH
+sudo mv opencode-agents /usr/local/bin/
+
+# Verify the installation
+opencode-agents --help
+```
+
+**Windows:**
+1. Extract the downloaded `.zip` file.
+2. Move the `opencode-agents.exe` binary to a permanent location (e.g., `C:\Program Files\OpenCodeAgents`).
+3. Add that directory to your system's `Path` environment variable via the Windows Settings.
+4. Open a new terminal and verify with `opencode-agents --help`.
+
+**Option B: Build from Source**
+
+If you have Go installed, you can build and install it directly:
 ```bash
 go install github.com/opencode/opencode-agents/cmd/opencode-agents@latest
 ```
