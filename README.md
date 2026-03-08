@@ -28,7 +28,7 @@ Take the output, save it to your `agents/` directory, and you now have a repeata
 
 **Option A: Pre-compiled Binaries (Recommended)**
 
-1. Download the latest release for your operating system and architecture from the **[Releases Page](https://github.com/opencode/opencode-agents/releases)**.
+1. Download the latest release for your operating system and architecture from the **[Releases Page](https://github.com/DanHenton/opencode-agents/releases)**.
 2. Extract the archive and place the `opencode-agents` binary into a directory that is included in your system's `PATH`.
 
 > 💡 **What is the system PATH?**
@@ -72,6 +72,7 @@ Use the interactive checklist to pick which agents you want active. This updates
 
 Agents are defined in simple Markdown files. You can organize them however you like:
 
+
 ```text
 ~/.config/opencode-agents/
 ├── AGENTS.md           # Shared context & documentation
@@ -79,6 +80,19 @@ Agents are defined in simple Markdown files. You can organize them however you l
     ├── architect.md    # A "Reasoning" model for design
     ├── plan.md         # A read-only planning partner
     └── fix.md          # A "Speed" model for quick edits
+```
+
+
+```sh
+
+cd ~/.config/opencode-agents/ && opencode .
+
+```
+
+Build a new agent persona, then import the agent into the target opencode.json file via:
+
+```
+opencode-agents
 ```
 
 ### Configuration Format
