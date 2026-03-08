@@ -5,23 +5,30 @@
 *.so
 *.dylib
 
-# Compiled opencode-agents binary
+# Compiled binaries and build artifacts
 /opencode-agents
+bin/
+dist/
 
 # Test binary, built with `go test -c`
 *.test
-
-# Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+coverage.txt
 
 # Go workspace file
 go.work
 go.work.sum
 
-# Temporary configuration files used for local testing
+# Local configuration and secrets
 opencode.json
 custom-agents/
 agents/
+.env
+.env.*
+*.key
+*.pem
+credentials.json
+secrets.yaml
 
 # IDE / Editor folders
 .idea/
