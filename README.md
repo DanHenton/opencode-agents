@@ -1,104 +1,100 @@
 # OpenCode Agents
 
-[![CI](https://github.com/opencode/opencode-agents/actions/workflows/ci.yml/badge.svg)](https://github.com/opencode/opencode-agents/actions/workflows/ci.yml)
+**Define, Version, and Sync your AI Personas.**
 
-`opencode-agents` is a fast, robust Go CLI tool and Terminal UI (TUI) designed to manage and sync external GitOps-style Markdown agent prompts into a deeply nested `opencode.json` configuration file.
+OpenCode Agents is a configuration manager that lets you define specialized AI personas as code, version control them with Git, and sync them instantly to your **OpenCode** environment.
 
-It allows you to maintain your agent prompts as clean, version-controllable Markdown files (with YAML frontmatter) and easily inject them into your active OpenCode configuration, either interactively via a sleek TUI or automatically via CLI flags.
+## 💡 Why Personas?
 
-## Key Features
+Generic AI assistants are great, but complex engineering workflows often require specific roles and strict rules.
 
-*   **Interactive TUI:** Easily toggle which agents are enabled or disabled using a sleek terminal interface powered by [Charmbracelet's Huh](https://github.com/charmbracelet/huh).
-*   **GitOps-Friendly:** Define agents using standard Markdown files with YAML frontmatter. Keep your prompts organized and version-controlled.
-*   **Safe JSON Merging:** Intelligently mutates the `opencode.json` file. It updates the `"agent"` key while safely preserving all other unknown top-level and nested fields (e.g., `server`, `skills`).
-*   **Automation Ready:** Powerful CLI flags to bypass the TUI entirely, perfect for CI/CD pipelines or power-user scripts.
+-   **Consistency:** Ensure your AI always follows your team's style guide, security protocols, or documentation standards.
+-   **Specialization:** Configure **Reasoning** (Pro) models for complex architecture and **Speed** (Flash) models for quick syntax fixes.
+-   **Workflow Control:** Create a chain of command—start with a **Planner** to scope the work, then switch to a **Builder** to execute it.
 
-## Installation
+## 🤖 Workflow: Using Agents to Build Agents
 
-### From Binaries
-You can download pre-compiled binaries for Linux, macOS, and Windows from the [GitHub Releases](https://github.com/opencode/opencode-agents/releases) page.
+The most powerful way to define a new persona is to use your existing AI toolkit to build it.
 
-### From Source (Using Go)
-If you have Go installed (1.21+), you can install the latest version directly:
+**Don't start from scratch.** Use **OpenCode** to scaffold your new agent definitions:
 
+> "Create a new agent persona for **Security Auditing**. It should use a Reasoning model, be extremely paranoid about input validation, and strictly output findings in a markdown table."
+
+Take the output, save it to your `agents/` directory, and you now have a repeatable, versioned expert for that task.
+
+## ⚡️ Quick Start
+
+### 1. Install
+Download the latest binary for your platform from our **[Release Page](https://github.com/opencode/opencode-agents/releases)**.
+
+*Building from source?*
 ```bash
 go install github.com/opencode/opencode-agents/cmd/opencode-agents@latest
 ```
 
-## Usage & CLI Flags
-
-By default, running `opencode-agents` without any flags will launch the interactive TUI, allowing you to select which agents to enable or disable.
-
+### 2. Run
 ```bash
 opencode-agents
 ```
+*(First run? We'll automatically generate a starter set of agents in `~/.config/opencode-agents/` for you.)*
 
-*(Note: The TUI will automatically pre-select any agents that are already enabled in your `opencode.json` file.)*
+### 3. Select
+Use the interactive checklist to pick which agents you want active. This updates your local configuration (e.g., `opencode.json`), keeping your keys and server settings safe while swapping out system prompts.
 
-### CLI Flags
+## 📂 Configuration
 
-*   `--global`: Update the global configuration file located at `~/.config/opencode/opencode.json`.
-*   `--local`: Update the local configuration file located at `./opencode.json`.
-*   `--sync-all`: Bypass the interactive TUI and automatically sync and enable all discovered agents.
-*   `--dir <path>`: Override the default source directory for agent Markdown files. Defaults to `$OPENCODE_AGENTS_DIR` or `~/.config/opencode-agents/agents`.
+Agents are defined in simple Markdown files. You can organize them however you like:
 
-*Note: You cannot use both `--global` and `--local` flags simultaneously.*
+```text
+~/.config/opencode-agents/
+├── AGENTS.md           # Shared context & documentation
+└── agents/
+    ├── architect.md    # A "Reasoning" model for design
+    ├── plan.md         # A read-only planning partner
+    └── fix.md          # A "Speed" model for quick edits
+```
 
-## Agent File Format
+### Configuration Format
 
-Agents are defined using standard Markdown files (`.md`). The file uses YAML frontmatter to define metadata (which gets injected into the JSON) and the body of the Markdown file acts as the agent's actual `"prompt"`.
+Each file uses YAML frontmatter for configuration and the body for the system prompt.
 
-**Example: `code-reviewer.md`**
+**Example: The Planner**
+*Uses a **Reasoning** model to think before acting.*
 
 ```markdown
 ---
-name: code-reviewer
-description: An expert code reviewer
-model: gpt-4-turbo
-temperature: 0.2
+name: plan
+description: Read-only pair programmer for planning
+model: gemini-pro-1.5  # or o1, claude-3-opus, etc.
 ---
-You are an expert Senior Software Engineer.
-Please review the provided code for potential bugs, security vulnerabilities, and adherence to best practices.
-Provide constructive feedback and suggest improvements.
+You are an expert Senior Software Engineer acting as a collaborative pair programmer.
+**DEFAULT STATE:** PLAN MODE.
+
+**CRITICAL CONSTRAINTS:**
+- STRICTLY FORBIDDEN: Any file edits or modifications.
+- NO CODE GENERATION: Do not generate functional code blocks.
+- GOAL: Read files, understand the context, and produce a detailed Implementation Plan.
 ```
 
-*   **`name`**: (Optional) Overrides the agent's name in the JSON. If omitted, the filename (without `.md`) is used.
-*   **`description`**: (Optional) A brief description of the agent, shown in the TUI.
-*   **Other metadata**: Any other YAML keys (like `model`, `temperature`) are safely injected into the agent's JSON object.
-*   **Markdown Body**: Everything below the `---` block becomes the agent's `"prompt"`.
+**Example: The Fixer**
+*Uses a **Speed** model for instant results.*
 
-## Configuration Paths
+```markdown
+---
+name: quick-fix
+description: Fast syntax fixes and linting
+model: gemini-flash-1.5 # or gpt-4o-mini, haiku, etc.
+temperature: 0.1
+---
+You are a code cleaner. Fix syntax errors in the provided snippet.
+Output ONLY the corrected code. No conversational filler.
+```
 
-*   **Source Directory (Markdown files)**:
-    1.  The path provided via the `--dir` flag.
-    2.  The `$OPENCODE_AGENTS_DIR` environment variable.
-    3.  Fallback: `~/.config/opencode-agents/agents`.
-*   **Target JSON (`opencode.json`)**:
-    *   With `--local`: `./opencode.json`
-    *   With `--global`: `~/.config/opencode/opencode.json`
+## 🛠 Features
 
-## Development & Contributing
+-   **Interactive TUI**: Easily toggle agents on/off with a terminal interface.
+-   **GitOps Friendly**: Check your `~/.config/opencode-agents/` directory into Git to share personas with your team.
+-   **Model Agnostic**: Configure any model ID supported by your backend in the frontmatter.
 
-To contribute to `opencode-agents` or run it locally from source:
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/opencode/opencode-agents.git
-   cd opencode-agents
-   ```
-
-2. Run the CLI directly:
-   ```bash
-   go run ./cmd/opencode-agents --help
-   ```
-
-3. Format and tidy code before committing:
-   ```bash
-   go fmt ./...
-   go mod tidy
-   ```
-
-4. Run the test suite:
-   ```bash
-   go test -v -race -cover ./...
-   ```
+## License
+MIT

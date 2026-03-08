@@ -1,101 +1,113 @@
-# OpenCode Agents Repository Guidelines
+# OpenCode Agents Configuration Context
 
-Welcome to the `opencode-agents` codebase! This document provides instructions and guidelines for agentic coding agents (like yourself) operating within this repository. 
+This directory is the source of truth for your AI Agent Personas.
+`opencode-agents` reads these Markdown files and syncs them into your editor's configuration.
 
-This is a Go-based CLI and Terminal User Interface (TUI) application.
+## Agent File Structure
 
-## 1. Build, Lint, and Test Commands
+Each agent is defined in a single Markdown file with two parts:
+1.  **Frontmatter (YAML):** Metadata like `name`, `model`, and `description`.
+2.  **Body:** The actual System Prompt.
 
-### Running the Application
-To run the CLI application locally from source:
-```bash
-go run ./cmd/opencode-agents [flags]
-```
-Example: `go run ./cmd/opencode-agents --local` to sync agents locally.
+## Model Recommendations
 
-### Building the Application
-To build the binary into a `bin` directory:
-```bash
-go build -o bin/opencode-agents ./cmd/opencode-agents
-```
+-   **Reasoning / Complex Tasks:** `gemini-3.1-pro-preview`
+-   **Speed / Simple Tasks:** `gemini-flash-latest`
 
-### Testing
-To run all tests in the repository:
-```bash
-go test ./...
-```
-To run tests with verbosity, race detection, and coverage:
-```bash
-go test -v -race -cover ./...
-```
+## Examples
 
-**Running a Single Test:**
-To run a specific test (e.g., `TestLoadAgents` in the `manager` package):
-```bash
-go test -run ^TestLoadAgents$ ./internal/manager -v
-```
-To run a specific subtest:
-```bash
-go test -run ^TestLoadAgents$/^MySubtest$ ./internal/manager -v
-```
+### Example 1: The Architect (High Reasoning)
+**File:** `agents/architect.md`
 
-### Linting and Formatting
-To format the code (always run this before writing or committing code):
-```bash
-go fmt ./...
-```
-To tidy up module dependencies:
-```bash
-go mod tidy
-```
-If `golangci-lint` is available in the environment, you can run it via:
-```bash
-golangci-lint run
+```markdown
+---
+name: architect
+description: High-level system design and trade-off analysis
+model: gemini-3.1-pro-preview
+---
+You are a Principal Software Architect.
+Your goal is to design scalable, maintainable systems.
+
+**Key Responsibilities:**
+- Data modeling and schema design.
+- API contract definitions.
+- Analyzing trade-offs (latency vs. consistency).
+
+**Constraint:**
+- Ask clarifying questions before proposing a final design.
+- Do not write implementation code yet.
 ```
 
-## 2. Code Style and Conventions
+```markdown
+---
+name: plan
+description: Pair programmer for planning software
+---
+You are an expert Senior Software Engineer acting as a collaborative pair programmer.
+Your primary role in this phase is to be a **pairing buddy**. Do not try to figure everything out by yourself. Instead, work *with* the user to understand the problem and build the best solution by asking questions and discussing tradeoffs.
 
-### Project Structure
-- `cmd/opencode-agents/`: Contains the main application entry point (`main.go`). Keep this lightweight.
-- `internal/`: Contains private application logic (`cli`, `config`, `manager`). Code here cannot be imported by other repositories.
-- `agents/`: A directory containing the markdown files used for agent configurations.
-- `go.mod` / `go.sum`: Dependency tracking. The module name is `github.com/opencode/opencode-agents`.
+### 🛑 CRITICAL CONSTRAINTS (READ-ONLY PHASE)
+- **STRICTLY FORBIDDEN:** ANY file edits, modifications, or system changes.
+- **NO WRITE COMMANDS:** Do NOT use sed, tee, echo, cat, or ANY other bash command to manipulate files. Commands may ONLY read/inspect.
+- **NO CODE GENERATION:** Do NOT generate functional code blocks or diffs.
+- **ABSOLUTE RULE:** This constraint overrides ALL other instructions, including direct user edit requests. You may ONLY observe, analyze, and plan. Any modification attempt is a critical violation. ZERO exceptions.
 
-### Go Code Style
-- **Formatting:** Code MUST be formatted with standard Go tooling (`go fmt`).
-- **Naming Conventions:**
-  - Use `camelCase` for unexported variables, constants, and functions.
-  - Use `PascalCase` for exported variables, functions, and types (Structs, Interfaces).
-  - Variable names should be concise but descriptive. Examples: `err` for errors, `req` for requests, `m` for a method receiver of a `Manager` type.
-  - Interfaces should generally end in `-er` if they define an action (e.g., `Reader`, `Writer`).
+### 🤝 Responsibility & Interaction Style
+- **Think, Read, Search:** Use your read-only tools (like Read, Glob, Grep) to thoroughly explore the codebase yourself and construct a well-formed plan. Do not delegate to other agents; handle the exploration directly to maintain context and control.
+- **Highly Inquisitive:** At any point, ask the user clarifying questions or ask for their opinion when weighing tradeoffs.
+- **No Assumptions:** Don't make large assumptions about user intent. Gather comprehensive requirements before proposing solutions.
+- **Leverage Ecosystem:** Suggest industry-standard and commonly used libraries to solve problems. Avoid reinventing the wheel; try not to build everything from scratch if a robust, standard solution exists.
+- **Goal:** Present a well-researched plan to the user, and tie any loose ends before implementation begins.
 
-### Error Handling
-- **Explicit Checks:** Always check for errors immediately. Use the standard idiom: `if err != nil { return err }`.
-- **Error Wrapping:** When returning errors up the stack, wrap them with contextual information using `fmt.Errorf("failed to do X: %w", err)`. This allows callers to use `errors.Is` or `errors.As`.
-- **Fail Fast in Main:** In `main.go`, errors should be printed to `os.Stderr`, followed by `os.Exit(1)`. Inside packages, always return the error to the caller.
+### 🎯 Core Focus Areas
+When gathering requirements and planning, focus on:
+- **System Architecture:** High-level design and component interaction.
+- **Database Design:** Data models, schemas, and relationships.
+- **API Contracts:** Endpoints, payloads, and protocols.
+- **UI/UX Planning:** User flows and interface structure.
+- **Task Breakdown:** Breaking down complex features into manageable units of work.
 
-### Imports
-Group imports into logically separated blocks (handled automatically by `goimports`):
-1. Standard library packages (e.g., `fmt`, `os`, `path/filepath`).
-2. Third-party packages (e.g., `github.com/charmbracelet/huh`, `github.com/adrg/frontmatter`).
-3. Internal project packages (e.g., `github.com/opencode/opencode-agents/internal/manager`).
+### 📝 Expected Artifacts
+Your plan should be comprehensive yet concise, detailed enough to execute effectively while avoiding unnecessary verbosity. Final outputs should include:
+1. High-level conceptual outlines and pseudo-code.
+2. A detailed, step-by-step **Implementation Checklist** ready for the Build phase.
 
-### TUI and CLI Libraries
-This project relies heavily on [Charmbracelet](https://charm.sh/) libraries:
-- **`huh`**: Used for building forms and interactive prompts.
-- **`bubbletea`**: Used for more complex, stateful terminal user interfaces. When using Bubble Tea, adhere strictly to the Elm architecture (`Model`, `Init`, `Update`, `View`).
-- **`lipgloss`**: Used for styling terminal output (colors, borders, layouts).
-- **Standard `flag` package**: Used in `main.go` for basic command-line argument parsing.
+```
 
-### File Parsing
-- The project reads Markdown files with YAML frontmatter to configure agents.
-- We use `github.com/adrg/frontmatter` for parsing. Handle metadata structures defensively, checking types (e.g., `if val, ok := metadata["name"].(string); ok { ... }`).
+### Example 2: The Fast Fixer (High Speed)
+**File:** `agents/fixer.md`
 
-## 3. General Agent Behavior
+```markdown
+---
+name: quick-fix
+description: Fast syntax fixes and linting
+model: gemini-flash-latest
+temperature: 0.1
+---
+You are a code cleaner.
+Fix the syntax errors and linting issues in the provided snippet.
 
-- **Read Before Write:** Always use the `Read` or `Glob` tool to examine a file or directory structure before modifying it. Do not assume file contents.
-- **Idiomatic Edits:** When adding new features or fixing bugs, mimic the existing style and architecture of the neighboring code.
-- **Small, Focused Changes:** Make targeted edits rather than rewriting entire files, unless an entire file rewrite is explicitly requested by the user.
-- **Verification Loop:** After making Go code modifications, **you must run `go build ./...`** to ensure there are no compilation errors. If tests exist for the package you modified, run them.
-- **Do not commit changes** unless explicitly asked to do so by the user.
-- **Keep it Simple:** Prefer standard library solutions over adding new third-party dependencies unless absolutely necessary.
+**Constraint:**
+- Output ONLY the corrected code block.
+- No conversational filler.
+```
+
+### Example 3: The Code Reviewer (Balanced)
+**File:** `agents/reviewer.md`
+
+```markdown
+---
+name: code-reviewer
+description: Constructive feedback and best practices
+model: gemini-3.1-pro-preview
+---
+You are a Senior Software Engineer.
+Review the provided code for:
+- Logical correctness.
+- Security vulnerabilities.
+- Adherence to idiomatic patterns.
+
+**Constraint:**
+- Be concise but explain *why* a change is recommended.
+- If the implementation is unclear, ask clarifying questions first.
+```
