@@ -106,7 +106,10 @@ Each file uses YAML frontmatter for configuration and the body for the system pr
 ---
 name: plan
 description: Read-only pair programmer for planning
-model: gemini-pro-1.5  # or o1, claude-3-opus, etc.
+model: model-name
+permission:
+  edit: deny
+  bash: deny
 ---
 You are an expert Senior Software Engineer acting as a collaborative pair programmer.
 **DEFAULT STATE:** PLAN MODE.
@@ -117,6 +120,7 @@ You are an expert Senior Software Engineer acting as a collaborative pair progra
 - GOAL: Read files, understand the context, and produce a detailed Implementation Plan.
 ```
 
+
 **Example: The Fixer**
 *Uses a **Speed** model for instant results.*
 
@@ -124,11 +128,41 @@ You are an expert Senior Software Engineer acting as a collaborative pair progra
 ---
 name: quick-fix
 description: Fast syntax fixes and linting
-model: gemini-flash-1.5 # or gpt-4o-mini, haiku, etc.
+model: model-name
 temperature: 0.1
 ---
 You are a code cleaner. Fix syntax errors in the provided snippet.
 Output ONLY the corrected code. No conversational filler.
+```
+
+### Permissions
+
+You can strictly control what an agent is allowed to do by adding a `permission` block to the frontmatter. This maps directly to the OpenCode security schema, supporting `allow`, `deny`, and `ask`.
+
+**Example: Locked Down Security Auditor**
+```markdown
+---
+name: security-auditor
+permission:
+  read: allow
+  edit: deny
+  bash: deny
+  task: ask
+---
+You are a security expert. Audit the following code for vulnerabilities.
+```
+
+**Example: Granular Path Permissions**
+```markdown
+---
+name: scoped-fixer
+permission:
+  read: allow
+  edit:
+    src/components: allow
+    internal/secrets: deny
+---
+You are allowed to fix UI components, but never touch secrets.
 ```
 
 ## 🛠 Features
