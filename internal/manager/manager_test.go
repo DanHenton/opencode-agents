@@ -84,6 +84,57 @@ I am a plan agent.`
 	}
 }
 
+func TestCommandManager_LoadAgentsWithPermissions(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	fileContent := `---
+name: secure-agent
+permission:
+  edit: deny
+  bash: ask
+  read:
+    internal/secrets: deny
+---
+Prompt body`
+
+	err := os.WriteFile(filepath.Join(tmpDir, "secure.md"), []byte(fileContent), 0644)
+	if err != nil {
+		t.Fatalf("Failed to write secure.md: %v", err)
+	}
+
+	manager := NewCommandManager(tmpDir)
+	agents, err := manager.LoadAgents()
+	if err != nil {
+		t.Fatalf("Expected LoadAgents to succeed, got %v", err)
+	}
+
+	if len(agents) != 1 {
+		t.Fatalf("Expected 1 agent, got %d", len(agents))
+	}
+
+	agent := agents[0]
+	permissions, ok := agent.Metadata["permission"].(map[string]interface{})
+	if !ok {
+		t.Fatalf("Expected permission to be a map[string]interface{}, got %T", agent.Metadata["permission"])
+	}
+
+	if permissions["edit"] != "deny" {
+		t.Errorf("Expected edit: deny, got %v", permissions["edit"])
+	}
+	if permissions["bash"] != "ask" {
+		t.Errorf("Expected bash: ask, got %v", permissions["bash"])
+	}
+
+	readPerms, ok := permissions["read"].(map[string]interface{})
+	if !ok {
+		t.Fatalf("Expected permission.read to be a map[string]interface{}, got %T", permissions["read"])
+	}
+
+	if readPerms["internal/secrets"] != "deny" {
+		t.Errorf("Expected read.internal/secrets: deny, got %v", readPerms["internal/secrets"])
+	}
+}
+
 func TestCommandManager_DirNotExist(t *testing.T) {
 	manager := NewCommandManager("/path/to/nowhere/that/does/not/exist/ever")
 	agents, err := manager.LoadAgents()

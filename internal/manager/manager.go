@@ -61,6 +61,11 @@ func (m *CommandManager) LoadAgents() ([]AgentConfig, error) {
 
 		// Overrides from frontmatter
 		if metadata != nil {
+			// Sanitize metadata to ensure it can be serialized to JSON
+			for k, v := range metadata {
+				metadata[k] = sanitizeValue(v)
+			}
+
 			if n, ok := metadata["name"].(string); ok && n != "" {
 				name = n
 			}
@@ -80,4 +85,31 @@ func (m *CommandManager) LoadAgents() ([]AgentConfig, error) {
 	}
 
 	return agents, nil
+}
+
+// sanitizeValue recursively converts map[interface{}]interface{} to map[string]interface{}
+// and handles slices to ensure the data is serializable to JSON.
+func sanitizeValue(v interface{}) interface{} {
+	switch val := v.(type) {
+	case map[interface{}]interface{}:
+		res := make(map[string]interface{})
+		for k, v2 := range val {
+			res[fmt.Sprintf("%v", k)] = sanitizeValue(v2)
+		}
+		return res
+	case map[string]interface{}:
+		res := make(map[string]interface{})
+		for k, v2 := range val {
+			res[k] = sanitizeValue(v2)
+		}
+		return res
+	case []interface{}:
+		res := make([]interface{}, len(val))
+		for i, v2 := range val {
+			res[i] = sanitizeValue(v2)
+		}
+		return res
+	default:
+		return val
+	}
 }
