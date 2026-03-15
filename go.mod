@@ -4,7 +4,7 @@ go 1.24.0
 
 require (
 	github.com/adrg/frontmatter v0.2.0
-	github.com/charmbracelet/huh v0.8.0
+	github.com/charmbracelet/huh v1.0.0
 )
 
 require (
