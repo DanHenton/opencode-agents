@@ -1,4 +1,4 @@
-module github.com/opencode/opencode-agents
+module github.com/danhenton/opencode-agents
 
 go 1.24.0
 

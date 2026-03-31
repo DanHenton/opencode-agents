@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/opencode/opencode-agents/internal/cli"
+	"github.com/danhenton/opencode-agents/internal/cli"
 )
 
 func main() {
