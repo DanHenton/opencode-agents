@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 
 	"github.com/charmbracelet/huh"
-	"github.com/opencode/opencode-agents/internal/config"
-	"github.com/opencode/opencode-agents/internal/manager"
+	"github.com/danhenton/opencode-agents/internal/config"
+	"github.com/danhenton/opencode-agents/internal/manager"
 )
 
 type CLI struct {
